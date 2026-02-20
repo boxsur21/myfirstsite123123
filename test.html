@@ -1,0 +1,524 @@
+kvnbmw, [20.02.2026 22:07]
+# Код был обрезан! Вот полная исправленная версия 🔧
+
+Предыдущий код был слишком длинным и обрезался. Вот **полный рабочий код**:
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Print Shop</title>
+    <style>
+        :root {
+            --bg-main: #0d0d0d;
+            --bg-card: #1a1a2e;
+            --bg-input: #111;
+            --text-main: #e0e0e0;
+            --text-muted: #888;
+            --text-heading: #fff;
+            --primary: #00d4ff;
+            --accent: #e94560;
+            --border: #222;
+            --border-header: #0f3460;
+        }
+        body.light {
+            --bg-main: #f0f2f5;
+            --bg-card: #fff;
+            --bg-input: #f5f5f5;
+            --text-main: #333;
+            --text-muted: #666;
+            --text-heading: #222;
+            --border: #ddd;
+            --border-header: #c5cae9;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+        header {
+            background: var(--bg-card);
+            padding: 14px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-header);
+            position: sticky; top: 0; z-index: 100;
+            flex-wrap: wrap; gap: 10px;
+        }
+        .logo { font-size: 24px; font-weight: bold; color: var(--primary); cursor: pointer; }
+        .logo span { color: var(--accent); }
+        .header-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+        nav button {
+            background: transparent; border: 1px solid var(--primary);
+            color: var(--primary); padding: 7px 14px; border-radius: 25px;
+            cursor: pointer; font-size: 12px; transition: all 0.3s; white-space: nowrap;
+        }
+        nav button:hover, nav button.active { background: var(--primary); color: #0d0d0d; }
+        .theme-toggle {
+            background: transparent; border: 1px solid var(--primary); color: var(--primary);
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 16px;
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s;
+        }
+        .theme-toggle:hover { background: var(--primary); color: #0d0d0d; }
+        .cart-btn { position: relative; }
+        .cart-badge {
+            position: absolute; top: -6px; right: -6px; background: var(--accent);
+            color: #fff; font-size: 10px; width: 18px; height: 18px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center; font-weight: bold;
+        }
+        .cart-badge.show { display: flex; }
+        .hero {
+            text-align: center; padding: 60px 20px;
+            background: var(--bg-card); border-bottom: 1px solid var(--border);
+        }
+        .hero h1 { font-size: 40px; margin-bottom: 12px; color: var(--text-heading); }
+        .hero h1 span { color: var(--primary); }
+        .hero p { font-size: 16px; color: var(--text-muted); max-width: 600px; margin: 0 auto; }
+        .section { max-width: 1200px; margin: 0 auto; padding: 35px 20px; }
+        .section-title {
+            font-size: 26px; text-align: center; margin-bottom: 25px; color: var(--primary);
+        }
+        .section-title::after {
+            content: ''; display: block; width: 50px; height: 3px;
+            background: var(--accent); margin: 8px auto 0; border-radius: 2px;
+        }
+        .popular-section {
+            background: var(--bg-card); border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border); padding: 30px 0;
+        }
+        .search-bar { max-width: 500px; margin: 0 auto 15px; position: relative; }
+        .search-bar input {
+            width: 100%; padding: 11px 18px 11px 42px; background: var(--bg-card);
+            border: 1px solid var(--border); border-radius: 30px; color: var(--text-main);
+            font-size: 14px; outline: none;
+        }
+        .search-bar input:focus { border-color: var(--primary); }
+        .search-bar .si { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 16px; }
+        .cat-filter { display: flex; justify-content: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .cat-filter button {
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+            padding: 7px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; transition: all 0.3s;
+        }
+        .cat-filter button:hover, .cat-filter button.active {
+            background: var(--primary); color: #0d0d0d; border-color: var(--primary);
+        }
+        .products-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;
+        }
+        .pcard {
+            background: var(--bg-card); border-radius: 14px; overflow: hidden;
+            border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer;
+        }
+        .pcard:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,212,255,0.12); }
+        .pcard .cimg {
+            width: 100%; height: 200px; overflow: hidden;
+            border-bottom: 2px solid var(--border-header); position: relative;
+        }
+        .pcard .cimg img { width: 100%; height: 100%; object-fit: cover; }
+        .pcard .cimg .vb {
+            position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7);
+            color: #fff; padding: 3px 8px; border-radius: 10px; font-size: 11px;
+        }
+        .pcard .cimg .cb {
+            position: absolute; top: 8px; left: 8px; background: var(--primary);
+            color: #0d0d0d; padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;
+        }
+        .pcard .cbody { padding: 16px; }
+        .pcard h3 { font-size: 16px; margin-bottom: 5px; color: var(--text-heading); }
+        .pcard p {
+            font-size: 12px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.4;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .pcard .cf { display: flex; justify-content: space-between; align-items: center; }
+        .pcard .price { font-size: 18px; color: var(--primary); font-weight: bold; }
+        .pcard .acb {
+            background: var(--primary); color: #0d0d0d; border: none; width: 34px; height: 34px;
+            border-radius: 50%; cursor: pointer; font-size: 16px; transition: all 0.3s;
+        }
+        .pcard .acb:hover { background: var(--accent); color: #fff; }
+        .nop { text-align: center; color: var(--text-muted); font-size: 16px; padding: 50px; }
+        .contacts-block {
+            max-width: 600px; margin: 0 auto; background: var(--bg-card);
+            padding: 35px; border-radius: 15px; border: 1px solid var(--border);
+        }
+        .ci { display: flex; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--border); font-size: 15px; }
+        .ci:last-child { border-bottom: none; }
+        .ci .cl { color: var(--primary); min-width: 130px; font-weight: bold; }
+        .ci .cv { color: var(--text-main); }
+        .mo {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 200; justify-content: center;
+            align-items: center; padding: 20px;
+        }
+        .mo.show { display: flex; }
+        .md {
+            background: var(--bg-card); padding: 30px; border-radius: 15px;
+            border: 1px solid var(--border-header); width: 100%; max-width: 500px;
+            position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .md-lg { max-width: 650px; }
+        .md h2 { text-align: center; margin-bottom: 18px; color: var(--primary); }
+        .md .xb {
+            position: absolute; top:10px; right: 14px; background: none;
+            border: none; color: var(--accent); font-size: 22px; cursor: pointer;
+        }
+        .gc {
+            position: relative; width: 100%; height: 280px; border-radius: 12px;
+            overflow: hidden; margin-bottom: 15px; background: var(--bg-input);
+        }
+        .gc img { width: 100%; height: 100%; object-fit: cover; }
+        .gn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(0,0,0,0.6); color: #fff; border: none;
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 18px;
+        }
+        .gn.gp { left: 8px; }
+        .gn.gnx { right: 8px; }
+        .gdots { text-align: center; margin-bottom: 12px; }
+        .gdots span {
+            display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+            background: var(--border); margin: 0 3px; cursor: pointer;
+        }
+        .gdots span.active { background: var(--primary); }
+        .dinfo h2 { text-align: left; margin-bottom: 6px; }
+        .dinfo .dcat { color: var(--primary); font-size: 12px; margin-bottom: 8px; }
+        .dinfo .ddesc { color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; font-size: 14px; }
+        .dinfo .dprice { font-size: 26px; color: var(--primary); font-weight: bold; margin-bottom: 6px; }
+        .dinfo .dviews { font-size: 12px; color: var(--text-muted); margin-bottom: 15px; }
+        .dbtn { display: flex; gap: 8px; flex-wrap: wrap; }
+        .dbtn button {
+            flex: 1; min-width: 120px; padding: 11px; border: none; border-radius: 8px;
+            font-size: 13px; cursor: pointer; font-weight: bold; transition: all 0.3s;
+        }
+        .bc { background: var(--primary); color: #0d0d0d; }
+        .bw { background: #25D366; color: #fff; }
+        .bt { background: #0088cc; color: #fff; }
+        .cit {
+            display: flex; align-items: center; background: var(--bg-input); padding: 12px;
+            border-radius: 10px; margin-bottom: 8px; gap: 12px; flex-wrap: wrap;
+        }
+        .cit img { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; }
+        .cit .cinf { flex: 1; min-width: 140px; }
+        .cit .cinf h4 { color: var(--text-heading); margin-bottom: 3px; font-size: 14px; }
+        .cit .cinf .price { color: var(--primary); font-weight: bold; font-size: 13px; }
+        .cit .qc { display: flex; align-items: center; gap: 8px; }
+        .cit .qc button {
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main);
+            width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 14px;
+        }
+        .cit .qc span { font-weight: bold; min-width: 18px; text-align: center; }
+        .cit .rb {
+            background: var(--accent); color: #fff; border: none; padding: 5px 10px;
+            border-radius: 6px; cursor: pointer; font-size: 12px;
+        }
+        .ctot {
+            background: var(--bg-card); padding: 22px; border-radius: 12px;
+            border: 1px solid var(--border); margin-top: 18px; text-align: center;
+        }
+        .ctot .tp { font-size: 28px; color: var(--primary); font-weight: bold; margin: 8px 0; }
+        .ctot .ob { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .ctot .ob button {
+            flex: 1; min-width: 140px; padding: 12px; border: none; border-radius: 8px;
+            font-size: 14px; cursor: pointer; font-weight: bold;
+        }
+        .fg { margin-bottom: 16px; }
+        .fg label { display: block; margin-bottom: 4px; color: var(--text-muted); font-size: 13px; }
+        .fg input, .fg textarea, .fg select {
+            width: 100%; padding: 10px 12px; background: var(--bg-input);
+            border: 1px solid var(--border); border-radius: 8px; color: var(--text-main);
+            font-size: 14px; outline: none;
+        }
+        .fg input:focus, .fg textarea:focus, .fg select:focus { border-color: var(--primary); }
+        .fg textarea { resize: vertical; min-height: 60px; }
+        .btn {
+            width: 100%; padding: 12px; border: none; border-radius: 8px;
+            font-size: 14px; cursor: pointer; font-weight: bold; transition: all 0.3s;
+        }
+        .btn-p { background: var(--primary); color: #0d0d0d; }
+        .btn-p:hover { opacity: 0.85; }
+        .btn-d { background: var(--accent); color: #fff; }
+        .btn-d:hover { background: #c0392b; }
+        .btn-s { width: auto; padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+        .btn-e { background: #f39c12; color: #fff; }
+        .ap { max-width: 1200px; margin: 0 auto; padding: 35px 20px; }
+        .as {
+            background: var(--bg-card); padding: 25px; border-radius: 15px;
+            margin-bottom: 22px; border: 1px solid var(--border);
+        }
+        .as h3 { color: var(--primary); margin-bottom: 15px; font-size: 18px; }
+        .api {
+            display: flex; align-items: center; background: var(--bg-input);
+            padding: 12px; border-radius: 10px; margin-bottom: 8px; gap: 12px; flex-wrap: wrap;
+        }
+        .api img { width: 65px; height: 65px; object-fit: cover; border-radius: 8px; }
+        .api .info { flex: 1; min-width: 170px; }
+        .api .info h4 { color: var(--text-heading); margin-bottom: 2px; font-size: 14px; }
+        .api .info p { color: var(--text-muted); font-size: 11px; }
+        .api .info .price { color: var(--primary); font-weight: bold; font-size: 13px; }
+        .api .info .stats { color: var(--text-muted); font-size: 10px; margin-top: 2px; }
+        .api .actions { display: flex; gap: 5px; }
+        .ipc { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        .ipc img { width: 70px; height: 70px; object-fit: cover; border-radius: 6px; border: 2px solid var(--border); }
+        .crow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .crow label { min-width: 130px; color: var(--text-muted); font-size: 13px; }
+        .crow input[type="color"] { width: 45px; height: 32px; border: none; border-radius: 6px; cursor: pointer; background: none; }
+        .ctags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+        .ctag {
+            background: var(--bg-input); border: 1px solid var(--border);
+            padding: 5px 12px; border-radius: 14px; font-size: 12px;
+            display: flex; align-items: center; gap: 5px;
+        }
+        .ctag .rc { cursor: pointer; color: var(--accent); font-weight: bold; }
+        .page { display: none; }
+        .page.show { display: block; }
+        footer { text-align: center; padding: 22px; color: var(--text-muted); border-top: 1px solid var(--border); margin-top: 35px; font-size: 13px; }
+        .error-msg { color: var(--accent); text-align: center; margin-top: 8px; font-size: 13px; display: none; }
+        .toast {
+            position: fixed; bottom: 25px; right: 25px; background: var(--bg-card);
+            border: 1px solid var(--primary); color: var(--primary); padding: 12px 20px;
+            border-radius: 10px; font-size: 13px; z-index: 999; opacity: 0;
+            transform: translateY(20px); transition: all 0.4s; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .mf {
+            position: fixed; bottom: 22px; left: 22px; display: flex;
+            flex-direction: column; gap: 8px; z-index: 150;
+        }
+        .mf a {
+            width: 46px; height: 46px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 22px;
+            text-decoration: none; color: #fff; transition: transform 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .mf a:hover { transform: scale(1.12); }
+        .mf .wa { background: #25D366; }
+        .mf .tg { background: #0088cc; }
+        @media (max-width: 600px) {
+            header { flex-direction: column; padding: 10px; }
+            .hero h1 { font-size: 26px; }
+            .hero { padding: 35px 15px; }
+            .contacts-block { padding: 18px; }
+            .ci { flex-direction: column; align-items: flex-start; gap: 3px; }
+            .api { flex-direction: column; align-items: flex-start; }
+            .dbtn { flex-direction: column; }
+            .gc { height: 200px; }
+            .ctot .ob { flex-direction: column; }
+            .cit { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo" onclick="goHome()">3D<span>Print</span>Shop</div>
+        <div class="header-right">
+            <nav>
+                <button class="active" id="btnHome" onclick="showPage('home',this)">Главная</button>
+                <button id="btnCatalog" onclick="showPage('catalog',this)">Каталог</button>
+                <button id="btnCart" onclick="showPage('cart',this)" class="cart-btn">🛒 <span class="cart-badge" id="cartBadge">0</span></button>
+                <button id="btnContacts" onclick="showPage('contacts',this)">Контакты</button>
+                <button onclick="handleAdmin(this)" id="adminBtn">Админ</button>
+            </nav>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+        </div>
+    </header>
+
+    <div class="page show" id="page-home">
+        <div class="hero">
+            <h1>Качественная <span>3D печать</span></h1>
+            <p>Печатаем на заказ любые модели. Высокое качество, доступные цены, быстрые сроки.</p>
+        </div>
+        <div class="popular-section"><div class="section">
+            <h2 class="section-title">⭐ Популярные</h2>
+            <div class="products-grid" id="popularProducts"></div>
+        </div></div>
+        <div class="section">
+            <h2 class="section-title">🆕 Новинки</h2>
+            <div class="products-grid" id="homeProducts"></div>
+        </div>
+    </div>
+
+    <div class="page" id="page-catalog">
+        <div class="section">
+            <h2 class="section-title">Каталог</h2>
+            <div class="search-bar"><span class="si">🔍</span><input type="text" id="searchInput" placeholder="Поиск..." oninput="renderCatalog()"></div>
+            <div class="cat-filter" id="catFilter"></div>
+            <div class="products-grid" id="catalogProducts"></div>
+        </div>
+    </div>
+
+    <div class="page" id="page-cart">
+        <div class="section">
+            <h2 class="section-title">🛒 Корзина</h2>
+            <div id="cartItems"></div>
+            <div id="cartTotal"></div>
+        </div>
+    </div>
+
+    <div class="page" id="page-contacts">
+        <div class="section">
+            <h2 class="section-title">Контакты</h2>
+            <div class="contacts-block" id="contactsBlock"></div>
+        </div>
+    </div>
+
+    <div class="page" id="page-admin">
+        <div class="ap">
+            <h2 class="section-title">Админ-панель</h2>
+            <div class="as"><h3>➕ Добавить товар</h3>
+                <div class="fg"><label>Название</label><input type="text" id="pN" placeholder="Название"></div>
+                <div class="fg"><label>Описание</label><textarea id="pD" placeholder="Описание"></textarea></div>
+                <div class="fg"><label>Цена (₽)</label><input type="number" id="pP" placeholder="1000"></div>
+                <div class="fg"><label>Категория</label><select id="pC"></select></div>
+                <div class="fg"><label>Фото (можно несколько)</label><input type="file" id="pI" accept="image/*" multiple onchange="prevImgs(this)"><div class="ipc" id="imgPrev"></div></div>
+                <button class="btn btn-p" onclick="addProd()">Добавить товар</button>
+            </div>
+            <div class="as"><h3>🏷️ Категории</h3>
+                <div style="display:flex;gap:8px;margin-bottom:8px"><input type="text" id="newCat" placeholder="Новая категория" style="flex:1;padding:9px;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;color:var(--text-main);outline:none"><button class="btn btn-p btn-s" onclick="addCat()">+</button></div>
+                <div class="ctags" id="catTags"></div>
+            </div>
+            <div class="as"><h3>📦 Товары</h3><div id="adminList"></div></div>
+            <div class="as"><h3>📞 Контакты</h3>
+                <div class="fg"><la
+
+bel>Телефон</label><input type="text" id="cPh" placeholder="+7..."></div>
+                <div class="fg"><label>Email</label><input type="email" id="cEm" placeholder="email@..."></div>
+                <div class="fg"><label>Telegram</label><input type="text" id="cTg" placeholder="@user"></div>
+                <div class="fg"><label>WhatsApp</label><input type="text" id="cWa" placeholder="+7..."></div>
+                <div class="fg"><label>VK</label><input type="text" id="cVk" placeholder="vk.com/..."></div>
+                <div class="fg"><label>Адрес</label><input type="text" id="cAd" placeholder="Город..."></div>
+                <button class="btn btn-p" onclick="saveCont()">Сохранить</button>
+            </div>
+            <div class="as"><h3>🎨 Цвета сайта</h3>
+                <div class="crow"><label>Основной</label><input type="color" id="col1" value="#00d4ff" oninput="prevCol()"></div>
+                <div class="crow"><label>Акцентный</label><input type="color" id="col2" value="#e94560" oninput="prevCol()"></div>
+                <button class="btn btn-p" onclick="saveCol()">Сохранить цвета</button>
+                <button class="btn btn-d" style="margin-top:8px" onclick="resetCol()">Сбросить</button>
+            </div>
+            <div class="as"><h3>🔑 Сменить пароль</h3>
+                <div class="fg"><label>Текущий</label><input type="password" id="oP"></div>
+                <div class="fg"><label>Новый</label><input type="password" id="nP"></div>
+                <button class="btn btn-p" onclick="chgPass()">Сменить</button>
+                <p class="error-msg" id="pErr"></p>
+            </div>
+            <button class="btn btn-d" onclick="doLogout()">Выйти</button>
+        </div>
+    </div>
+
+    <div class="mo" id="loginMo"><div class="md">
+        <button class="xb" onclick="closeLo()">✕</button>
+        <h2>🔐 Вход</h2>
+        <div class="fg"><label>Логин</label><input type="text" id="loU" placeholder="admin"></div>
+        <div class="fg"><label>Пароль</label><input type="password" id="loP" placeholder="Пароль" onkeydown="if(event.key==='Enter')doLo()"></div>
+        <button class="btn btn-p" onclick="doLo()">Войти</button>
+        <p class="error-msg" id="loErr">Неверный логин или пароль</p>
+    </div></div>
+
+    <div class="mo" id="prodMo"><div class="md md-lg">
+        <button class="xb" onclick="closePM()">✕</button>
+        <div id="pmContent"></div>
+    </div></div>
+
+    <div class="mo" id="editMo"><div class="md">
+        <button class="xb" onclick="closeEM()">✕</button>
+        <h2>✏️ Редактировать</h2>
+        <div class="fg"><label>Название</label><input type="text" id="eN"></div>
+        <div class="fg"><label>Описание</label><textarea id="eD"></textarea></div>
+        <div class="fg"><label>Цена</label><input type="number" id="eP"></div>
+        <div class="fg"><label>Категория</label><select id="eC"></select></div>
+        <input type="hidden" id="eIdx">
+        <button class="btn btn-p" onclick="saveEd()">Сохранить</button>
+    </div></div>
+
+    <div class="mf" id="mFloat"></div>
+    <div class="toast" id="toast"></div>
+
+    <footer><p>© 2025 3DPrintShop</p></footer>
+
+<script>
+function gD(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function sD(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)}
+function enc(p){var r='',s='x3DpRiNt9';for(var i=0;i<p.length;i++){r+=(p.charCodeAt(i)^s.charCodeAt(i%s.length)).toString(16).padStart(2,'0')}return r+'_'+p.length}
+
+var VER='5.0',isAdm=false,selCat='all',gIdx=0,gImgs=[],tmpImgs=[];
+
+if(localStorage.getItem('ver')!==VER){localStorage.removeItem('credentials');localStorage.setItem('ver',VER)}
+if(!localStorage.getItem('credentials'))sD('credentials',{login:String.fromCharCode(97,100,109,105,110),password:enc(String.fromCharCode(97,100,109,105,110,49,50,51))});
+if(!localStorage.getItem('products'))sD('products',[]);
+if(!localStorage.getItem('cart'))sD('cart',[]);
+if(
+
+!localStorage.getItem('categories'))sD('categories',['Фигурки','Запчасти','Декор','Другое']);
+if(!localStorage.getItem('contacts'))sD('contacts',{phone:'+7(999)123-45-67',email:'print3d@mail.ru',telegram:'@print3d_shop',whatsapp:'+79991234567',vk:'vk.com/print3d_shop',address:'Москва'});
+if(!localStorage.getItem('colors'))sD('colors',{p:'#00d4ff',a:'#e94560'});
+if(!localStorage.getItem('theme'))localStorage.setItem('theme','dark');
+
+applyTheme();applyCol();updMF();renderHome();updBadge();
+
+function toggleTheme(){var c=localStorage.getItem('theme');localStorage.setItem('theme',c==='dark'?'light':'dark');applyTheme()}
+function applyTheme(){var t=localStorage.getItem('theme')||'dark';if(t==='light'){document.body.classList.add('light');document.getElementById('themeBtn').textContent='☀️'}else{document.body.classList.remove('light');document.getElementById('themeBtn').textContent='🌙'}}
+
+function applyCol(){var c=gD('colors',{p:'#00d4ff',a:'#e94560'});document.documentElement.style.setProperty('--primary',c.p);document.documentElement.style.setProperty('--accent',c.a);document.getElementById('col1').value=c.p;document.getElementById('col2').value=c.a}
+function prevCol(){document.documentElement.style.setProperty('--primary',document.getElementById('col1').value);document.documentElement.style.setProperty('--accent',document.getElementById('col2').value)}
+function saveCol(){sD('colors',{p:document.getElementById('col1').value,a:document.getElementById('col2').value});toast('✅ Цвета сохранены!')}
+function resetCol(){sD('colors',{p:'#00d4ff',a:'#e94560'});applyCol();toast('✅ Сброшено!')}
+
+function updMF(){var c=gD('contacts',{}),h='';if(c.whatsapp){h+='<a href="https://wa.me/'+c.whatsapp.replace(/[^0-9]/g,'')+'" target="_blank" class="wa" title="WhatsApp">💬</a>'}if(c.telegram){h+='<a href="https://t.me/'+c.telegram.replace('@','')+'" target="_blank" class="tg" title="Telegram">✈️</a>'}document.getElementById('mFloat').innerHTML=h}
+
+function showPage(n,b){var pp=document.querySelectorAll('.page');for(var i=0;i<pp.length;i++)pp[i].classList.remove('show');document.getElementById('page-'+n).classList.add('show');var bb=document.querySelectorAll('nav button');for(var i=0;i<bb.length;i++)bb[i].classList.remove('active');if(b)b.classList.add('active');if(n==='home')renderHome();if(n==='catalog')renderCatalog();if(n==='contacts')renderContacts();if(n==='cart')renderCart();if(n==='admin')renderAdmin()}
+function goHome(){showPage('home',document.getElementById('btnHome'))}
+
+function rCards(cid,prods){var c=document.getElementById(cid);if(!prods.length){c.innerHTML='<p class="nop">Товаров пока нет 😔</p>';return}var h='';for(var i=0;i<prods.length;i++){var p=prods[i],img=(p.images&&p.images.length)?p.images[0]:(p.image||''),v=p.views||0;h+='<div class="pcard" onclick="openProd('+p.id+')">';h+='<div class="cimg">';if(img)h+='<img src="'+img+'">';else h+='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-input);color:var(--text-muted)">Нет фото</div>';h+='<span class="vb">👁 '+v+'</span>';if(p.category)h+='<span class="cb">'+p.category+'</span>';h+='</div><div class="cbody"><h3>'+p.name+'</h3><p>'+(p.description||'')+'</p><div class="cf"><span class="price">'+Number(p.price).toLocaleString()+' ₽</span><button class="acb" onclick="event.stopPropagation();addCart('+p.id+')" title="В корзину">🛒</button></div></div></div>'}c.innerHTML=h}
+
+function renderHome(){var p=gD('products',[]);rCards('homeProducts',p.slice(-6).reverse());var pop=p.slice().sort(function(a,b){return(b.views||0)-(a.views||0)}).slice(0,4);rCards('popularProducts',pop)}
+
+function renderCatalog(){var p=gD('products',[]),s=document.getElementById('searchInput').value.toLowerCase().trim(),cats=gD('categories',[]);var fh='<button class="'+(selCat==='all'?'active':'')+'" onclick="fCat(\'all\')">Все</button>';for(var i=0;i<cats.length;i++)fh+='<button class="'+(selCat===cats[i]?'active':'')+'" onclick="fCat(\''+cats[i]+'\')">'+cats[i]+'</button>';document.getElementById('catFilter').innerHTML=fh;var f=p.filter(function(x){var ms=!s||x.name.toLowerCase().indexOf(s)!==-1||(x.description||'').toLowerCase().indexOf(s)!==-1;var mc=selCat==='all'||x.category===selCat;return ms&&mc});rCards('catalogProducts',f.reverse())}
+function fCat(c){selCat=c;renderCatalog()}
+
+function renderContacts(){var c=gD('contacts',{}),items=[],h='';if(c.phone)items.push({l:'📱 Телефон',v:c.phone});if(c.email)items.push({l:'📧 Email',v:c.email});if(c.telegram)items.push({l:'✈️ Telegram',v:c.telegram});if(c.whatsapp)items.push({l:'💬 WhatsApp',v:c.whatsapp});if(c.vk)items.push({l:'🌐 VK',v:c.vk});if(c.address)items.push({l:'📍 Адрес',v:c.address});for(var i=0;i<items.length;i++)h+='<div class="ci"><span class="cl">'+items[i].l+'</span><span class="cv">'+items[i].v+'</span></div>';document.getElementById('contactsBlock').innerHTML=h}
+
+function openProd(id){var prods=gD('products',[]),p=null,idx=-1;for(var i=0;i<prods.length;i++)if(prods[i].id===id){p=prods[i];idx=i;break}if(!p)return;p.views=(p.views||0)+1;prods[idx]=p;sD('products',prods);var imgs=(p.images&&p.images.length)?p.images:(p.image?[p.image]:[]);gImgs=imgs;gIdx=0;var co=gD('contacts',{}),wn=(co.whatsapp||'').replace(/[^0-9]/g,''),tu=(co.telegram||'').replace('@',''),ot=encodeURIComponent('Хочу заказать: '+p.name+' ('+Number(p.price).toLocaleString()+' ₽)');var h='';if(imgs.length){h+='<div class="gc" id="gCont"><img src="'+imgs[0]+'" id="gImg">';if(imgs.length>1)h+='<button class="gn gp" onclick="gPrev()">‹</button><button class="gn gnx" onclick="gNext()">›</button>';h+='</div>';if(imgs.length>1){h+='<div class="gdots" id="gDots">';for(var i=0;i<imgs.length;i++)h+='<span class="'+(i===0?'active':'')+'" onclick="gGo('+i+')"></span>';h+='</div>'}}h+='<div class="dinfo"><h2 style="color:var(--text-heading)">'+p.name+'</h2>';if(p.category)h+='<div class="dcat">🏷️ '+p.category+'</div>';h+='<div class="ddesc">'+(p.description||'')+'</div>';h+='<div class="dprice">'+Number(p.price).toLocaleString()+' ₽</div>';h+='<div class="dviews">👁 '+p.views+'</div>';h+='<div class="dbtn"><button class="bc" onclick="addCart('+p.id+');closePM()">🛒 В корзину</button>';if(wn)h+='<button class="bw" onclick="window.open(\'https://wa.me/'+wn+'?text='+ot+'\',\'_blank\')">WhatsApp</button>';if(tu)h+='<button class="bt" onclick="window.open(\'https://t.me/'+tu+'?text='+ot+'\',\'_blank\')">Telegram</button>';h+='</div></div>';document.getElementById('pmContent').innerHTML=h;document.getElementById('prodMo').classList.add('show')}
+function closePM(){document.getElementById('prodMo').classList.remove('show')}
+function gGo(i){gIdx=i;document.getElementById('gImg').src=gImgs[i];var d=document.querySelectorAll('#gDots span');for(var j=0;j<d.length;j++)d[j].classList.remove('active');if(d[i])d[i].classList.add('active')}
+function gPrev(){gGo(gIdx<=0?gImgs.length-1:gIdx-1)}
+function gNext(){gGo(gIdx>=gImgs.length-1?0:gIdx+1)}
+
+function addCart(id){var c=gD('cart',[]),f=false;for(var i=0;i<c.length;i++)if(c[i].id===id){c[i].q++;f=true;break}if(!f)c.push({id:id,q:1});sD('cart',c);updBadge();toast('🛒 Добавлено!')}
+function updBadge(){var c=gD('cart',[]),t=0;for(var i=0;i<c.length;i++)t+=c[i].q;var b=document.getElementById('cartBadge');if(t>0){b.classList.add('show');b.textContent=t}else b.classList.remove('show')}
+function renderCart(){var c=gD('cart',[]),p=gD('products',[]),h='',tot=0;if(!c.length){document.getElementById('cartItems').innerHTML='<p class="nop">Корзина пуста 🛒</p>';document.getElementById('cartTotal').innerHTML='';return}for(var i=0;i<c.length;i++){var pr=null;for(var j=0;j<p.length;j++)if(p[j].id===c[i].id){pr=p[j];break}if(!pr)continue;var img=(pr.images&&pr.images.length)?pr.images[0]:(pr.image||''),sm=Number(pr.price)*c[i].q;tot+=sm;h+='<div class="cit">';if(img)h+='<img src="'+img+'">';h+='<div class="cinf"><h4>'+pr.name+'</h4><span class="price">'+Number(pr.price).toLocaleString()+' ₽</span></div>';h+='<div class="qc"><button onclick="chgQ('+i+',-1)">−</button><span>'+c[i].q+'</span><button onclick="chgQ('+i+',1)">+</button></div>';h+='<span style="color:var(--primary);font-weight:bold;min-width:70px;text-align:right">'+sm.toLocaleString()+' ₽</span>';h+='<button class="rb" onclick="rmCart('+i+')">✕</button></div>'}document.getElementById('cartItems').innerHTML=h;var co=gD('contacts',{}),wn=(co.whatsapp||'').replace(/[^0-9]/g,''),tu=(co.telegram||'').replace('@','');var orderList='Мой заказ:\n';for(var i=0;i<c.length;i++){var pr=null;for(var j=0;j<p.length;j++)if(p[j].id===c[i].id){pr=p[j];break}if(pr)orderList+='• '+pr.name+' x'+c[i].q+' = '+(Number(pr.price)*c[i].q).toLocaleString()+' ₽\n'}orderList+='Итого: '+tot.toLocaleString()+' ₽';var ot=encodeURIComponent(orderList);var th='<div class="ctot"><div>Итого:</div><div class="tp">'+tot.toLocaleString()+' ₽</div><div class="ob">';if(wn)th+='<button class="bw" onclick="window.open(\'https://wa.me/'+wn+'?text='+ot+'\',\'_blank\')">📱 WhatsApp</button>';if(tu)th+='<button class="bt" onclick="window.open(\'https://t.me/'+tu+'?text='+ot+'\',\'_blank\')">✈️ Telegram</button>';th+='<button class="btn-d" style="border:none;border-radius:8px;padding:12px;cursor:pointer;font-weight:bold" onclick="clearCart()">🗑 Очистить</button>';th+='</div></div>';document.getElementById('cartTotal').innerHTML=th}
+function chgQ(i,d){var c=gD('cart',[]);c[i].q+=d;if(c[i].q<=0)c.splice(i,1);sD('cart',c);updBadge();renderCart()}
+function rmCart(i){var c=gD('cart',[]);c.splice(i,1);sD('cart',c);updBadge();renderCart();toast('🗑 Удалено')}
+function clearCart(){if(!confirm('Очистить корзину?'))return;sD('cart',[]);updBadge();renderCart();toast('🗑 Корзина очищена')}
+
+function handleAdmin(b){if(isAdm){showPage('admin',b)}else{document.getElementById('loginMo').classList.add('show');document.getElementById('loErr').style.display='none';document.getElementById('loU').value='';document.getElementById('loP').value=''}}
+function closeLo(){document.getElementById('loginMo').classList.remove('show')}
+function doLo(){var l=document.getElementById('loU').value.trim(),p=document.getElementById('loP').value,c=gD('credentials',{});if(l===c.login&&enc(p)===c.password){isAdm=true;closeLo();document.getElementById('adminBtn').textContent='⚙️';showPage('admin',document.getElementById('adminBtn'));toast('✅ Вы вошли!')}else document.getElementById('loErr').style.display='block'}
+function doLogout(){isAdm=false;document.getElementById('adminBtn').textContent='Админ';goHome();toast('👋 Вы вышли')}
+
+function renderAdmin(){var p=gD('products',[]),c=gD('contacts',{}),cats=gD('categories',[]);document.getElementById('cPh').value=c.phone||'';document.getElementById('cEm').value=c.email||'';document.getElementById('cTg').value=c.telegram||'';document.getElementById('cWa').value=c.whatsapp||'';document.getElementById('cVk').value=c.vk||'';document.getElementById('cAd').value=c.address||'';var sh='<option value="">Без категории</option>';for(var i=0;i<cats.length;i++)sh+='<option>'+cats[i]+'</option>';document.getElementById('pC').innerHTML=sh;var th='';for(var i=0;i<cats.length;i++)th+='<span class="ctag">'+cats[i]+' <span class="rc" onclick="rmCat('+i+')">✕</span></span>';document.getElementById('catTags').innerHTML=th;var l=document.getElementById('adminList');if(!p.length){l.innerHTML='<p class="nop">Товаров нет</p>';return}var h='';for(var i=0;i<p.length;i++){var pr=p[i],img=(pr.images&&pr.images.length)?pr.images[0]:(pr.image||'');h+='<div class="api">';if(img)h+='<img src="'+img+'">';h+='<div class="info"><h4>'+pr.name+'</h4><p>'+(pr.description||'').substring(0,50)+'</p><div class="price">'+Number(pr.price).toLocaleString()+' ₽</div><div class="stats">👁 '+(pr.views||0)+' | 🏷️ '+(pr.category||'—')+'</div></div>';h+='<div class="actions"><button class="btn btn-e btn-s" onclick="openEdit('+i+')">✏️</button> <button class="btn btn-d btn-s" onclick="delProd('+i+')">🗑</button></div></div>'}l.innerHTML=h}
+
+function prevImgs(inp){var pr=document.getElementById('imgPrev');tmpImgs=[];pr.innerHTML='';if(!inp.files.length)return;for(var i=0;i<inp.files.length;i++){(function(file){var r=new FileReader();r.onload=function(e){tmpImgs.push(e.target.result);pr.innerHTML+='<img src="'+e.target.result+'">'};r.readAsDataURL(file)})(inp.files[i])}}
+function addProd(){var
+
+
+n=document.getElementById('pN').value.trim(),d=document.getElementById('pD').value.trim(),pr=document.getElementById('pP').value,c=document.getElementById('pC').value;if(!n||!pr){toast('⚠️ Название и цена!');return}var p=gD('products',[]);p.push({name:n,description:d,price:pr,category:c,images:tmpImgs.slice(),views:0,id:Date.now()});sD('products',p);document.getElementById('pN').value='';document.getElementById('pD').value='';document.getElementById('pP').value='';document.getElementById('pI').value='';document.getElementById('imgPrev').innerHTML='';tmpImgs=[];renderAdmin();toast('✅ Товар добавлен!')}
+function delProd(i){if(!confirm('Удалить?'))return;var p=gD('products',[]);p.splice(i,1);sD('products',p);renderAdmin();toast('🗑 Удалено')}
+function openEdit(i){var p=gD('products',[]),pr=p[i],cats=gD('categories',[]);document.getElementById('eN').value=pr.name;document.getElementById('eD').value=pr.description||'';document.getElementById('eP').value=pr.price;document.getElementById('eIdx').value=i;var sh='<option value="">Без категории</option>';for(var j=0;j<cats.length;j++)sh+='<option'+(cats[j]===pr.category?' selected':'')+'>'+cats[j]+'</option>';document.getElementById('eC').innerHTML=sh;document.getElementById('editMo').classList.add('show')}
+function closeEM(){document.getElementById('editMo').classList.remove('show')}
+function saveEd(){var i=parseInt(document.getElementById('eIdx').value),p=gD('products',[]);p[i].name=document.getElementById('eN').value.trim();p[i].description=document.getElementById('eD').value.trim();p[i].price=document.getElementById('eP').value;p[i].category=document.getElementById('eC').value;sD('products',p);closeEM();renderAdmin();toast('✅ Сохранено!')}
+
+function addCat(){var v=document.getElementById('newCat').value.trim();if(!v)return;var c=gD('categories',[]);c.push(v);sD('categories',c);document.getElementById('newCat').value='';renderAdmin();toast('✅ Категория добавлена!')}
+function rmCat(i){var c=gD('categories',[]);c.splice(i,1);sD('categories',c);renderAdmin();toast('🗑 Удалено')}
+
+function saveCont(){var c={phone:document.getElementById('cPh').value.trim(),email:document.getElementById('cEm').value.trim(),telegram:document.getElementById('cTg').value.trim(),whatsapp:document.getElementById('cWa').value.trim(),vk:document.getElementById('cVk').value.trim(),address:document.getElementById('cAd').value.trim()};sD('contacts',c);updMF();toast('✅ Контакты сохранены!')}
+
+function chgPass(){var o=document.getElementById('oP').value,n=document.getElementById('nP').value,c=gD('credentials',{}),e=document.getElementById('pErr');if(enc(o)!==c.password){e.textContent='❌ Неверный пароль!';e.style.display='block';return}if(n.length<4){e.textContent='❌ Мин. 4 символа!';e.style.display='block';return}c.password=enc(n);sD('credentials',c);document.getElementById('oP').value='';document.getElementById('nP').value='';e.style.display='none';toast('✅ Пароль изменён!')}
+</script>
+</body>
+</html>
